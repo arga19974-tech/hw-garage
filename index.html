@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HW Garage">
+<title>HW Garage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #e8000b;
+    --gold: #f5c218;
+    --green: #16a34a;
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1c1c1c;
+    --border: #2a2a2a;
+    --text: #f0f0f0;
+    --muted: #666;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg);
+    border-bottom: 2px solid var(--red);
+    padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px; letter-spacing: 2px; line-height: 1;
+  }
+  .logo em { color: var(--red); font-style: normal; }
+  .badge {
+    background: var(--red); color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px; letter-spacing: 1px;
+    padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1; padding: 12px 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px; letter-spacing: 1px;
+    color: var(--muted); background: none; border: none;
+    cursor: pointer; transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+  /* ── PAGE ── */
+  .page { display: none; padding-bottom: 40px; }
+  .page.active { display: block; }
+
+  /* ── ADD PAGE ── */
+  .add-section {
+    margin: 18px 16px 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .add-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; letter-spacing: 2px;
+    color: var(--muted);
+    padding: 12px 16px 0;
+  }
+
+  /* Photo upload */
+  .photo-zone {
+    margin: 10px 16px 16px;
+    position: relative;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    background: #0d0d0d;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    min-height: 140px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photo-zone:hover { border-color: var(--red); background: #150000; }
+  .photo-zone input[type=file] {
+    position: absolute; inset: 0;
+    opacity: 0; width: 100%; height: 100%; cursor: pointer;
+  }
+  .photo-placeholder {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    pointer-events: none;
+  }
+  .photo-placeholder .icon { font-size: 36px; }
+  .photo-placeholder .label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 1px; color: #888;
+  }
+  .photo-placeholder .sub { font-size: 12px; color: var(--muted); }
+  .photo-preview {
+    width: 100%; max-height: 260px; object-fit: cover;
+    display: none;
+  }
+  .photo-preview.visible { display: block; }
+  .photo-clear {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,0.7); border: none;
+    color: #fff; border-radius: 50%;
+    width: 28px; height: 28px;
+    font-size: 14px; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+  }
+  .photo-clear.visible { display: flex; }
+
+  /* SKU input */
+  .sku-wrap { padding: 10px 16px 16px; }
+  .sku-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; letter-spacing: 2px; color: var(--muted);
+    display: block; margin-bottom: 8px;
+  }
+  .sku-input {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Barlow', monospace;
+    font-size: 16px; letter-spacing: 1px;
+    outline: none;
+    transition: border-color 0.2s;
+    text-transform: uppercase;
+  }
+  .sku-input:focus { border-color: var(--red); }
+  .sku-input::placeholder { color: #444; text-transform: none; letter-spacing: 0; }
+
+  /* Divider */
+  .or-divider {
+    text-align: center; padding: 4px 16px;
+    font-size: 12px; color: var(--muted);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .or-divider::before, .or-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* Submit */
+  .submit-btn {
+    display: block; width: calc(100% - 32px);
+    margin: 14px 16px 0;
+    padding: 16px;
+    background: var(--red);
+    border: none; border-radius: 12px;
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px; letter-spacing: 2px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .submit-btn:hover { background: #c8000a; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { background: #333; color: #555; cursor: not-allowed; transform: none; }
+
+  /* ── RESULT CARD ── */
+  .result-card {
+    margin: 16px 16px 0;
+    border-radius: 14px; overflow: hidden;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .result-card.duplicate { border: 2px solid var(--gold); }
+  .result-card.new-car { border: 2px solid var(--green); }
+
+  .result-banner {
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .result-banner.duplicate { background: #1a1500; }
+  .result-banner.new-car { background: #001409; }
+
+  .result-emoji { font-size: 26px; }
+  .result-status {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px; letter-spacing: 1px;
+  }
+  .result-status.duplicate { color: var(--gold); }
+  .result-status.new-car { color: #22c55e; }
+
+  .result-body {
+    background: var(--surface2);
+    padding: 14px 16px;
+    display: flex; gap: 12px;
+  }
+  .result-thumb {
+    width: 80px; height: 80px;
+    object-fit: cover; border-radius: 8px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .result-info { flex: 1; min-width: 0; }
+  .result-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 0.5px;
+    line-height: 1.2; margin-bottom: 6px;
+    color: #fff;
+  }
+  .result-sku {
+    font-family: monospace; font-size: 12px;
+    background: #111; color: #aaa;
+    padding: 2px 8px; border-radius: 4px;
+    display: inline-block; margin-bottom: 6px;
+  }
+  .result-meta { font-size: 12px; color: var(--muted); }
+
+  .result-actions {
+    display: flex; gap: 8px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    flex: 1; padding: 10px 8px;
+    border: none; border-radius: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-save { background: var(--green); color: #fff; }
+  .btn-save:hover { background: #15803d; }
+  .btn-discard { background: #222; color: var(--muted); border: 1px solid var(--border); }
+  .btn-discard:hover { background: #2a2a2a; color: #fff; }
+
+  /* ── LOADING ── */
+  .loading-wrap {
+    display: none;
+    flex-direction: column; align-items: center;
+    gap: 14px; padding: 28px 16px;
+  }
+  .loading-wrap.visible { display: flex; }
+  .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid #222;
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 2px; color: #888;
+  }
+  .loading-sub { font-size: 13px; color: var(--muted); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1c1c1c; border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 20px;
+    font-size: 14px; color: var(--text);
+    transition: transform 0.3s ease;
+    white-space: nowrap; z-index: 999;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── COLLECTION PAGE ── */
+  .collection-toolbar {
+    padding: 14px 16px 10px;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .search-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--red); }
+  .search-input::placeholder { color: var(--muted); }
+
+  .sort-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--muted);
+    font-size: 18px; cursor: pointer;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 32px;
+  }
+  .empty-icon { font-size: 56px; margin-bottom: 14px; }
+  .empty-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px; letter-spacing: 1px;
+    color: #555; margin-bottom: 6px;
+  }
+  .empty-sub { font-size: 14px; color: var(--muted); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 16px 20px;
+  }
+
+  .car-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    animation: fadeIn 0.25s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .car-card-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: #0d0d0d;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+  }
+  .car-card-img.no-photo {
+    display: flex; align-items: center; justify-content: center;
+    background: #111; aspect-ratio: 1;
+  }
+  .car-card-body { padding: 10px; }
+  .car-card-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; letter-spacing: 0.5px;
+    line-height: 1.2; margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .car-card-sku {
+    font-family: monospace; font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .car-card-series {
+    font-size: 11px; color: var(--muted);
+    margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .car-delete {
+    position: absolute; top: 6px; right: 6px;
+    background: rgba(0,0,0,0.6);
+    border: none; color: #fff;
+    border-radius: 50%; width: 26px; height: 26px;
+    font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .car-card:hover .car-delete { opacity: 1; }
+
+  .car-count-badge {
+    position: absolute; top: 6px; left: 6px;
+    background: rgba(232,0,11,0.85);
+    color: #fff; border-radius: 6px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px; letter-spacing: 1px;
+    padding: 1px 6px;
+  }
+
+  /* ── DETAIL MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-height: 85vh;
+    overflow-y: auto;
+    animation: slideUpModal 0.3s ease;
+  }
+  @keyframes slideUpModal {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 12px auto 16px;
+  }
+  .modal-img {
+    width: 100%; max-height: 300px;
+    object-fit: cover;
+  }
+  .modal-body { padding: 16px 20px 32px; }
+  .modal-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px; letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .modal-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .modal-row:last-child { border-bottom: none; }
+  .modal-row-label { color: var(--muted); width: 70px; flex-shrink: 0; }
+  .modal-row-val { color: var(--text); font-weight: 500; }
+  .modal-close {
+    display: block; width: 100%;
+    margin-top: 16px; padding: 14px;
+    background: #222; border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px; letter-spacing: 1px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">HW <em>GARAGE</em></div>
+  <div class="badge" id="badgeCount">0 AUTOS</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('add')">➕ AGREGAR</button>
+  <button class="tab" onclick="showTab('collection')">🚗 MI COLECCIÓN</button>
+</div>
+
+<!-- ── ADD TAB ── -->
+<div class="page active" id="page-add">
+
+  <!-- Photo -->
+  <div class="add-section">
+    <div class="add-section-title">FOTO DEL BLISTER (opcional)</div>
+    <div class="photo-zone" id="photoZone">
+      <input type="file" accept="image/*" capture="environment" id="photoInput" onchange="handlePhoto(event)">
+      <div class="photo-placeholder" id="photoPlaceholder">
+        <span class="icon">📸</span>
+        <span class="label">TOMAR FOTO / ELEGIR IMAGEN</span>
+        <span class="sub">La IA leerá el modelo automáticamente</span>
+      </div>
+      <img class="photo-preview" id="photoPreview" src="" alt="">
+      <button class="photo-clear" id="photoClear" onclick="clearPhoto(event)">✕</button>
+    </div>
+  </div>
+
+  <div class="or-divider">— O —</div>
+
+  <!-- SKU -->
+  <div class="add-section">
+    <div class="sku-wrap">
+      <label class="sku-label" for="skuInput">SKU DEL EMPAQUE (opcional)</label>
+      <input class="sku-input" id="skuInput" type="text"
+        placeholder="Ej: HTC27-N7C5"
+        oninput="this.value = this.value.toUpperCase(); updateSubmitBtn()">
+    </div>
+  </div>
+
+  <button class="submit-btn" id="submitBtn" disabled onclick="analyzeAndAdd()">
+    ANALIZAR Y AGREGAR
+  </button>
+
+  <!-- Loading -->
+  <div class="loading-wrap" id="loadingWrap">
+    <div class="spinner"></div>
+    <div class="loading-label">ANALIZANDO...</div>
+    <div class="loading-sub">La IA está leyendo tu Hot Wheels</div>
+  </div>
+
+  <!-- Result -->
+  <div id="resultArea"></div>
+
+</div>
+
+<!-- ── COLLECTION TAB ── -->
+<div class="page" id="page-collection">
+  <div class="collection-toolbar">
+    <input class="search-input" id="searchInput" type="text"
+      placeholder="Buscar por nombre, SKU o serie..."
+      oninput="renderCollection()">
+  </div>
+  <div id="collectionGrid"></div>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <img class="modal-img" id="modalImg" src="" alt="" style="display:none">
+    <div class="modal-body">
+      <div class="modal-name" id="modalName"></div>
+      <div id="modalRows"></div>
+      <button class="modal-close" onclick="closeModalDirect()">CERRAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STORAGE ──
+const STORE_KEY = 'hw_garage_v1';
+let collection = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+
+function saveCollection() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(collection));
+  updateBadge();
+}
+
+function updateBadge() {
+  const n = collection.length;
+  document.getElementById('badgeCount').textContent = n + (n === 1 ? ' AUTO' : ' AUTOS');
+}
+updateBadge();
+
+// ── TABS ──
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0 && tab==='add') || (i===1 && tab==='collection'));
+  });
+  document.getElementById('page-add').classList.toggle('active', tab === 'add');
+  document.getElementById('page-collection').classList.toggle('active', tab === 'collection');
+  if (tab === 'collection') renderCollection();
+}
+
+// ── PHOTO ──
+let currentPhotoBase64 = null;
+
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    currentPhotoBase64 = ev.target.result.split(',')[1];
+    document.getElementById('photoPreview').src = ev.target.result;
+    document.getElementById('photoPreview').classList.add('visible');
+    document.getElementById('photoPlaceholder').style.display = 'none';
+    document.getElementById('photoClear').classList.add('visible');
+    updateSubmitBtn();
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPhoto(e) {
+  e.stopPropagation();
+  currentPhotoBase64 = null;
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('photoPreview').classList.remove('visible');
+  document.getElementById('photoPlaceholder').style.display = '';
+  document.getElementById('photoClear').classList.remove('visible');
+  document.getElementById('photoInput').value = '';
+  updateSubmitBtn();
+}
+
+function updateSubmitBtn() {
+  const hasSku = document.getElementById('skuInput').value.trim().length > 0;
+  const hasPhoto = currentPhotoBase64 !== null;
+  document.getElementById('submitBtn').disabled = !(hasSku || hasPhoto);
+}
+
+// ── ANALYZE ──
+let pendingCar = null;
+
+async function analyzeAndAdd() {
+  const sku = document.getElementById('skuInput').value.trim();
+  const hasPhoto = currentPhotoBase64 !== null;
+
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('loadingWrap').classList.add('visible');
+  document.getElementById('resultArea').innerHTML = '';
+  pendingCar = null;
+
+  try {
+    const carInfo = await callClaudeAPI(sku, currentPhotoBase64);
+    document.getElementById('loadingWrap').classList.remove('visible');
+    showResult(carInfo, sku, hasPhoto ? ('data:image/jpeg;base64,' + currentPhotoBase64) : null);
+  } catch(err) {
+    document.getElementById('loadingWrap').classList.remove('visible');
+    showToast('⚠️ Error al analizar. Intenta de nuevo.');
+    document.getElementById('submitBtn').disabled = false;
+  }
+}
+
+async function callClaudeAPI(sku, photoBase64) {
+  const userContent = [];
+
+  if (photoBase64) {
+    userContent.push({
+      type: 'image',
+      source: { type: 'base64', media_type: 'image/jpeg', data: photoBase64 }
+    });
+  }
+
+  let prompt = 'Analiza este Hot Wheels y responde SOLO con JSON válido, sin texto extra ni backticks.\n';
+  if (sku) prompt += `SKU del empaque: ${sku}\n`;
+  if (photoBase64) prompt += 'La imagen es la parte trasera (o delantera) del blister.\n';
+  prompt += `
+Devuelve este JSON exacto:
+{
+  "name": "nombre del modelo (ej: Dodge Viper SRT10 ACR)",
+  "series": "nombre de la serie (ej: HW Exotics)",
+  "seriesNum": "número en la serie (ej: 10/10)",
+  "year": "año de la serie si visible",
+  "sku": "SKU si visible o el proporcionado",
+  "color": "color principal del auto",
+  "notes": "notas breves (Treasure Hunt, Super TH, etc) o vacío"
+}
+Si no puedes identificar algún campo, usa cadena vacía "".`;
+
+  userContent.push({ type: 'text', text: prompt });
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': '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',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: userContent }]
+    })
+  });
+
+  const data = await response.json();
+  const text = data.content.map(b => b.text || '').join('');
+  const clean = text.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
+// ── RESULT ──
+function showResult(car, manualSku, photoDataUrl) {
+  // Merge manual SKU if AI didn't get one
+  if (!car.sku && manualSku) car.sku = manualSku;
+  if (!car.name) car.name = car.sku || 'Hot Wheels';
+
+  // Check duplicate
+  const isDuplicate = collection.some(c =>
+    (car.sku && c.sku && c.sku.toUpperCase() === car.sku.toUpperCase()) ||
+    (car.name && c.name && c.name.toUpperCase() === car.name.toUpperCase() && c.color === car.color)
+  );
+
+  pendingCar = { ...car, photo: photoDataUrl, addedAt: new Date().toISOString() };
+
+  const statusClass = isDuplicate ? 'duplicate' : 'new-car';
+  const emoji = isDuplicate ? '⚠️' : '✅';
+  const statusText = isDuplicate ? '¡YA LO TIENES!' : 'NUEVO EN TU COLECCIÓN';
+
+  const html = `
+    <div class="result-card ${statusClass}">
+      <div class="result-banner ${statusClass}">
+        <span class="result-emoji">${emoji}</span>
+        <span class="result-status ${statusClass}">${statusText}</span>
+      </div>
+      <div class="result-body">
+        ${photoDataUrl
+          ? `<img class="result-thumb" src="${photoDataUrl}" alt="">`
+          : `<div class="result-thumb" style="display:flex;align-items:center;justify-content:center;background:#111;font-size:30px">🚗</div>`
+        }
+        <div class="result-info">
+          <div class="result-name">${car.name || '—'}</div>
+          ${car.sku ? `<div class="result-sku">${car.sku}</div>` : ''}
+          <div class="result-meta">${[car.series, car.seriesNum, car.color].filter(Boolean).join(' · ')}</div>
+          ${car.notes ? `<div class="result-meta" style="margin-top:4px;color:#f5c218">${car.notes}</div>` : ''}
+        </div>
+      </div>
+      <div class="result-actions">
+        ${isDuplicate
+          ? `<button class="btn btn-save" onclick="saveCar()">GUARDAR DE TODAS FORMAS</button>`
+          : `<button class="btn btn-save" onclick="saveCar()">GUARDAR EN COLECCIÓN</button>`
+        }
+        <button class="btn btn-discard" onclick="discardCar()">DESCARTAR</button>
+      </div>
+    </div>`;
+
+  document.getElementById('resultArea').innerHTML = html;
+  document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function saveCar() {
+  if (!pendingCar) return;
+  collection.unshift(pendingCar);
+  saveCollection();
+  showToast('🔥 ¡' + (pendingCar.name || 'Auto') + ' guardado!');
+  resetAddForm();
+}
+
+function discardCar() {
+  pendingCar = null;
+  document.getElementById('resultArea').innerHTML = '';
+  document.getElementById('submitBtn').disabled = false;
+}
+
+function resetAddForm() {
+  pendingCar = null;
+  currentPhotoBase64 = null;
+  document.getElementById('skuInput').value = '';
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('photoPreview').classList.remove('visible');
+  document.getElementById('photoPlaceholder').style.display = '';
+  document.getElementById('photoClear').classList.remove('visible');
+  document.getElementById('photoInput').value = '';
+  document.getElementById('resultArea').innerHTML = '';
+  document.getElementById('submitBtn').disabled = true;
+}
+
+// ── COLLECTION RENDER ──
+function renderCollection() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const grid = document.getElementById('collectionGrid');
+
+  let items = collection;
+  if (q) {
+    items = items.filter(c =>
+      (c.name || '').toLowerCase().includes(q) ||
+      (c.sku || '').toLowerCase().includes(q) ||
+      (c.series || '').toLowerCase().includes(q)
+    );
+  }
+
+  if (items.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">${q ? '🔍' : '🏁'}</div>
+        <div class="empty-title">${q ? 'SIN RESULTADOS' : 'COLECCIÓN VACÍA'}</div>
+        <div class="empty-sub">${q ? 'Intenta otra búsqueda' : 'Agrega tu primer Hot Wheels en la pestaña ➕'}</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = `<div class="grid">${items.map((c, i) => carCardHTML(c, collection.indexOf(c))).join('')}</div>`;
+}
+
+function carCardHTML(car, idx) {
+  const img = car.photo
+    ? `<img class="car-card-img" src="${car.photo}" alt="${car.name || ''}">`
+    : `<div class="car-card-img no-photo">🚗</div>`;
+
+  return `
+    <div class="car-card" onclick="openModal(${idx})">
+      ${img}
+      <button class="car-delete" onclick="deleteCar(event, ${idx})">✕</button>
+      <div class="car-card-body">
+        <div class="car-card-name">${car.name || 'Hot Wheels'}</div>
+        ${car.sku ? `<div class="car-card-sku">${car.sku}</div>` : ''}
+        ${car.series ? `<div class="car-card-series">${car.series}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function deleteCar(e, idx) {
+  e.stopPropagation();
+  if (!confirm('¿Eliminar este auto de la colección?')) return;
+  collection.splice(idx, 1);
+  saveCollection();
+  renderCollection();
+  showToast('Auto eliminado');
+}
+
+// ── MODAL ──
+function openModal(idx) {
+  const car = collection[idx];
+  if (!car) return;
+  const img = document.getElementById('modalImg');
+  if (car.photo) {
+    img.src = car.photo; img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+  document.getElementById('modalName').textContent = car.name || 'Hot Wheels';
+
+  const rows = [
+    ['SKU', car.sku],
+    ['Serie', car.series],
+    ['Número', car.seriesNum],
+    ['Color', car.color],
+    ['Año', car.year],
+    ['Notas', car.notes],
+    ['Agregado', car.addedAt ? new Date(car.addedAt).toLocaleDateString('es') : ''],
+  ].filter(r => r[1]);
+
+  document.getElementById('modalRows').innerHTML = rows.map(r =>
+    `<div class="modal-row"><span class="modal-row-label">${r[0]}</span><span class="modal-row-val">${r[1]}</span></div>`
+  ).join('');
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
